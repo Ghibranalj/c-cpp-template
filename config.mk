@@ -6,9 +6,13 @@ BUILD_DIR = build
 # RES_DIR = res
 INC_DIR = src
 
+### PACKAGE CONFIG ###
+PKG_DIR= vendor
+PKG_FILE= package.sh
+
 ### COMPILER CONFIG ###
 CC=gcc -std=c17
 CPP=g++ -std=c++17
 CFLAGS= -Wall -Wextra -pedantic -O0 -g
 LDFLAG=
-LIBS=  # your libs here
+LIBS= # your libs here

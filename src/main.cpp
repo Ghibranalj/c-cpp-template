@@ -1,7 +1,7 @@
-#include <iostream>
+#include <fmt/core.h>
 #include "helloer.h"
 
-int main() {
+int main(void){
     hello();
-    std::cout << "Hello from C++" << std::endl;
+    fmt::print("from C++ using fmt\n");
 }
