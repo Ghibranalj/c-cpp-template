@@ -52,6 +52,7 @@ $(BUILD_DIR):
 .PHONY: run
 run: all
 	$(info Running $(EXE))
+	@echo
 	@./$(EXE)
 
 .PHONY: test
@@ -93,7 +94,9 @@ distclean:
 
 $(EXE): $(OBJ)
 	$(info Linking $@)
-	@$(CPP) $(CFLAGS) -o $@ $^ $(LDFLAG)
+	@$(CPP) $(CFLAGS) -o $@ $^ $(LDFLAG) || \
+	printf "\nLinking failed (maybe no main?)\
+		   \nTry running \033[0;33m make clean \033[0m \n\nThis can happen after tests.\n"
 
 $(BUILD_DIR)/%.cpp.o: $(SRC_DIR)/%.cpp
 	$(info Compiling $<)
