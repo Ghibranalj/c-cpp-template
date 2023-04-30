@@ -21,6 +21,22 @@ include $(wildcard $(PKG_DIR)/*.mk)
 LDFLAG+= $(ARCHIVE)
 CFLAGS+= $(INCLUDES:%=-I%)
 
+### TEST
+ifneq ($(TEST_DIR),)
+
+TEST_SRC=$(wildcard $(TEST_DIR)/*.c)
+TEST_SRCPP=$(wildcard $(TEST_DIR)/*.cpp)
+TEST_OBJ=$(TEST_SRC:$(TEST_DIR)/%.c=$(BUILD_DIR)/%.test.c.o) $(TEST_SRCPP:$(TEST_DIR)/%.cpp=$(BUILD_DIR)/%.test.cpp.o)
+TEST_EXE=$(EXE).test
+
+TEST_ARCHIVE=
+TEST_INCLUDES=
+include $(wildcard $(PKG_DIR)/*.mk_test)
+TEST_CFLAGS+= $(TEST_INCLUDES:%=-I%)
+TEST_LDFLAG+= $(TEST_ARCHIVE)
+
+endif
+
 .PHONY: all
 all: mkdir $(EXE) $(RES_OUT)
 
@@ -37,6 +53,16 @@ run: all
 	$(info Running $(EXE))
 	@./$(EXE)
 
+.PHONY: test
+test: CFLAGS+= -DTEST -Dmain=_not_main
+test: clean mkdir $(TEST_EXE)
+	$(info Running $(TEST_EXE))
+ifneq ($(TEST_DIR),)
+	@./$(TEST_EXE)
+else
+    $(info No tests found)
+endif
+
 .PHONY: clean
 clean:
 	$(info Cleaning)
@@ -46,6 +72,9 @@ clean:
 lsp: clean
 	$(info Updating compile_commands.json)
 	@bear -- $(MAKE) all
+ifneq ($(TEST_DIR),)
+	@bear --append -- $(MAKE) $(TEST_EXE)
+endif
 
 .PHONY: package
 package: $(PKG_FILE)
@@ -81,4 +110,31 @@ $(BUILD_DIR)/$(RES_DIR)/%: $(RES_DIR)/%
 	$(info Copying $< to $@)
 	@cp $< $@
 
+########
+##TEST##
+########
+
+$(TEST_EXE): $(TEST_OBJ) $(OBJ)
+	$(info Linking $@)
+	@$(CPP) $(CFLAGS) -o $@ $^ $(LDFLAG) $(TEST_LDFLAG)
+
+$(BUILD_DIR)/%.test.cpp.o: $(TEST_DIR)/%.cpp $(BUILD_DIR)/%.test.cpp.d
+	$(info Compiling $<)
+	@$(CPP) $(CFLAGS) $(TEST_CFLAGS) -c -o $@ $<
+
+$(BUILD_DIR)/%.test.c.o: $(TEST_DIR)/%.c $(BUILD_DIR)/%.test.c.d
+	$(info Compiling $<)
+	@$(CC) $(CFLAGS) $(TEST_CFLAGS) -c -o $@ $<
+
+$(BUILD_DIR)/%.test.cpp.d: $(TEST_DIR)/%.cpp
+	$(info Generating dependencies for $<)
+	@$(CPP) $(CFLAGS) -MM -MT $(@:%.d=%.o) $< > $@
+
+$(BUILD_DIR)/%.test.c.d: $(TEST_DIR)/%.c
+	$(info Generating dependencies for $<)
+	@$(CC) $(CFLAGS) -MM -MT $(@:%.d=%.o) $< > $@
+
+BUILD_EXISTS := $(shell test -e $(BUILD_DIR) && echo 1 || echo 0)
+ifeq ($(BUILD_EXISTS), 1)
 -include $(DEPS)
+endif
