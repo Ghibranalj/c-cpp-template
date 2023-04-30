@@ -56,7 +56,7 @@ run: all
 	@./$(EXE)
 
 .PHONY: test
-test: CFLAGS+= -Dmain\(ABC\)=not_main\(ABC\)
+test: CFLAGS+= -Dmain\(...\)=not_main\(__VA_ARGS__\)
 test: $(BUILD) $(TEST_EXE)
 
 .PHONY: test.*
@@ -94,9 +94,10 @@ distclean:
 
 $(EXE): $(OBJ)
 	$(info Linking $@)
-	@$(CPP) $(CFLAGS) -o $@ $^ $(LDFLAG) || \
-	printf "\nLinking failed (maybe no main?)\
-		   \nTry running \033[0;33m make clean \033[0m \n\nThis can happen after tests.\n"
+	@$(CPP) $(CFLAGS) -o $@ $^ $(LDFLAG) || bash -c '\
+	printf "\n\033[0;31mLinking failed\033[0m (maybe no main?)\
+		   \nTry running \033[0;33m make clean \033[0m or using -B flag \
+		   \nThis can happen after tests.\n\n"; exit 1'
 
 $(BUILD_DIR)/%.cpp.o: $(SRC_DIR)/%.cpp
 	$(info Compiling $<)

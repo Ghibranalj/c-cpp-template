@@ -6,7 +6,7 @@ BUILD_DIR = build
 # RES_DIR = res
 INC_DIR = src
 # uncomment if you want to use tests
-# TEST_DIR = test
+TEST_DIR = test
 
 ### PACKAGE CONFIG ###
 PKG_DIR= vendor
