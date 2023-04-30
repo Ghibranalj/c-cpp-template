@@ -19,8 +19,7 @@ fmt=("https://github.com/fmtlib/fmt"
     "f8c9fabd948e4b3caea30d3c281018b0308491bf"
     "mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=Release ..; make"
     "libfmt.a"
-    "include"
-    "TEST RUNTIME")
+    "include")
 
 gtest=("https://github.com/google/googletest"
     "v1.13.0"
