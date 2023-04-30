@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 PACKAGES="fmt"
+TESTS="gtest" # only linked to tests
 
 # package=("git url"
 #          "commit hash"
@@ -19,3 +20,9 @@ fmt=("https://github.com/fmtlib/fmt"
     "mkdir build; cd build; cmake -DCMAKE_BUILD_TYPE=Release ..; make"
     "libfmt.a"
     "include")
+
+gtest=("https://github.com/google/googletest"
+    "v1.13.0"
+    "mkdir build; cd build; cmake .. -DBUILD_GMOCK=OFF; make"
+    "libgtest.a libgtest_main.a"
+    "googletest/include")

@@ -12,42 +12,62 @@ mkdir -p $PKG_DIR
 cd $PKG_DIR
 rm -rf -- *.mk
 
-for package in $PACKAGES; do
-    echo "Installing $package"
-    url=$(get_val $package 0)
-    commit=$(get_val $package 1)
-    build=$(get_val $package 2)
-    libfile=$(get_val $package 3)
-    includes=$(get_val $package 4)
-
-    if [ ! -d "$package" ]; then
-        git clone --recurse-submodules $url $package
+get_pkgs() {
+    # get variable value of the string $1
+    PKG=$(eval "echo \${$1}")
+    #only set when its test
+    SUFFIX=$2
+    #if suffix is set then prefix = suffix_
+    if [ ! -z "$SUFFIX" ]; then
+        PREFIX="${2}_"
     fi
+       
+    for package in $PKG; do
+        echo "Installing $package"
+        url=$(get_val $package 0)
+        commit=$(get_val $package 1)
+        build=$(get_val $package 2)
+        libfile=$(get_val $package 3)
+        includes=$(get_val $package 4)
 
-    cd $package
-    git checkout $commit
+        if [ ! -d "$package" ]; then
+            git clone --recurse-submodules $url $package
+        fi
 
-    eval $build
+        cd $package
+        git checkout $commit
 
-    cd "$PKG_DIR/$package"
-    ARCHIVE=""
-    for file in $libfile; do
-        A=$(fd "$file" . -I -a | tr '\n' ' ')
-        echo "Found $(realpath --relative-to=$PKG_DIR $A)"
-        ARCHIVE="$ARCHIVE $A"
-    done
+        eval $build
 
-    INCLUDES=""
-    for i in $includes; do
-        I=$(pwd)/$i
-        echo "Adding $(realpath --relative-to=$PKG_DIR $I) to includes"
-        INCLUDES="$INCLUDES $I"
-    done
+        cd "$PKG_DIR/$package"
+        ARCHIVE=""
+        for file in $libfile; do
+            A=$(fd "$file" . -I -a | tr '\n' ' ')
+            echo "Found $(realpath --relative-to=$PKG_DIR $A)"
+            ARCHIVE="$ARCHIVE $A"
+        done
 
-    cd $PKG_DIR
-    cat <<EOF >$package.mk
-ARCHIVE += $ARCHIVE
-INCLUDES += $INCLUDES
+        INCLUDES=""
+        for i in $includes; do
+            I=$(pwd)/$i
+            echo "Adding $(realpath --relative-to=$PKG_DIR $I) to includes"
+            INCLUDES="$INCLUDES $I"
+        done
+
+        cd $PKG_DIR
+
+        FILE_NAME="$package"
+        if [ ! -z "$SUFFIX" ]; then
+            FILE_NAME="$FILE_NAME.mk_$SUFFIX"
+        else
+            FILE_NAME="$FILE_NAME.mk"
+        fi
+        cat <<EOF >$FILE_NAME
+${PREFIX}ARCHIVE += $ARCHIVE
+${PREFIX}INCLUDES += $INCLUDES
 EOF
+    done
+}
 
-done
+get_pkgs "PACKAGES"
+get_pkgs "TESTS" "TEST"
