@@ -4,4 +4,6 @@
 int main(void){
     hello();
     fmt::print("from C++ using fmt\n");
+
+    return 0;
 }

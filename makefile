@@ -31,7 +31,7 @@ TEST_EXE=$(EXE).test
 
 TEST_ARCHIVE=
 TEST_INCLUDES=
-include $(wildcard $(PKG_DIR)/*.mk_test)
+include $(wildcard $(PKG_DIR)/*.mk_TEST)
 TEST_CFLAGS+= $(TEST_INCLUDES:%=-I%)
 TEST_LDFLAG+= $(TEST_ARCHIVE)
 
@@ -54,8 +54,8 @@ run: all
 	@./$(EXE)
 
 .PHONY: test
-test: CFLAGS+= -DTEST -Dmain=_not_main
-test: clean mkdir $(TEST_EXE)
+test: CFLAGS+= -Dmain\(ABC\)=not_main\(ABC\)
+test: mkdir $(TEST_EXE)
 	$(info Running $(TEST_EXE))
 ifneq ($(TEST_DIR),)
 	@./$(TEST_EXE)
@@ -99,11 +99,9 @@ $(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c $(BUILD_DIR)/%.c.d
 	@$(CC) $(CFLAGS) -c -o $@ $<
 
 $(BUILD_DIR)/%.cpp.d: $(SRC_DIR)/%.cpp
-	$(info Generating dependencies for $<)
 	@$(CPP) $(CFLAGS) -MM -MT $(@:%.d=%.o) $< > $@
 
 $(BUILD_DIR)/%.c.d: $(SRC_DIR)/%.c
-	$(info Generating dependencies for $<)
 	@$(CC) $(CFLAGS) -MM -MT $(@:%.d=%.o) $< > $@
 
 $(BUILD_DIR)/$(RES_DIR)/%: $(RES_DIR)/%
@@ -127,12 +125,10 @@ $(BUILD_DIR)/%.test.c.o: $(TEST_DIR)/%.c $(BUILD_DIR)/%.test.c.d
 	@$(CC) $(CFLAGS) $(TEST_CFLAGS) -c -o $@ $<
 
 $(BUILD_DIR)/%.test.cpp.d: $(TEST_DIR)/%.cpp
-	$(info Generating dependencies for $<)
-	@$(CPP) $(CFLAGS) -MM -MT $(@:%.d=%.o) $< > $@
+	@$(CPP) $(CFLAGS) $(TEST_CFLAGS) -MM -MT $(@:%.d=%.o) $< > $@
 
 $(BUILD_DIR)/%.test.c.d: $(TEST_DIR)/%.c
-	$(info Generating dependencies for $<)
-	@$(CC) $(CFLAGS) -MM -MT $(@:%.d=%.o) $< > $@
+	@$(CC) $(CFLAGS) $(TEST_CFLAGS) -MM -MT $(@:%.d=%.o) $< > $@
 
 BUILD_EXISTS := $(shell test -e $(BUILD_DIR) && echo 1 || echo 0)
 ifeq ($(BUILD_EXISTS), 1)

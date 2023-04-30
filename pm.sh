@@ -17,6 +17,11 @@ get_pkgs() {
     PKG=$(eval "echo \${$1}")
     #only set when its test
     SUFFIX=$2
+    #if suffix is set then prefix = suffix_
+    if [ ! -z "$SUFFIX" ]; then
+        PREFIX="${2}_"
+    fi
+       
     for package in $PKG; do
         echo "Installing $package"
         url=$(get_val $package 0)
@@ -58,11 +63,11 @@ get_pkgs() {
             FILE_NAME="$FILE_NAME.mk"
         fi
         cat <<EOF >$FILE_NAME
-ARCHIVE += $ARCHIVE
-INCLUDES += $INCLUDES
+${PREFIX}ARCHIVE += $ARCHIVE
+${PREFIX}INCLUDES += $INCLUDES
 EOF
     done
 }
 
 get_pkgs "PACKAGES"
-get_pkgs "TESTS" "test"
+get_pkgs "TESTS" "TEST"
