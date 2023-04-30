@@ -57,11 +57,12 @@ run: all
 test: CFLAGS+= -Dmain\(ABC\)=not_main\(ABC\)
 test: mkdir $(TEST_EXE)
 	$(info Running $(TEST_EXE))
-ifneq ($(TEST_DIR),)
-	@./$(TEST_EXE)
-else
-    $(info No tests found)
-endif
+
+.PHONY: test.*
+test.%: CFLAGS+= -Dmain\(ABC\)=not_main\(ABC\)
+test.%: mkdir  $(TEST_EXE)
+	$(info Running $* test)
+	@./$(TEST_EXE) --gtest_filter=*$**
 
 .PHONY: clean
 clean:
