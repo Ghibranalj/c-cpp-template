@@ -29,13 +29,19 @@ Edit config.mk
 ## Package management
 package management format
 ```bash
-package=("git url"
+package1=("git url"
+         "commit hash"
+         "build command"
+         "libpackage.a"
+         "include dirs")
+
+package2=("git url"
          "commit hash"
          "build command"
          "libpackage.a"
          "include dirs")
 # then you need to add your package name in
-PACKAGES="package"
+PACKAGES="package1 package2"
 ```
 NOTE: your package's build directory should prefereable be called `build`
 
